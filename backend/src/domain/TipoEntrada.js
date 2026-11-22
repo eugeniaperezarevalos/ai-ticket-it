@@ -10,4 +10,12 @@ export class TipoEntrada {
   hayCupoPara(cantidad) {
     return cantidad > 0 && cantidad <= this.cupo;
   }
+
+    descontarCupo(cantidad) {
+    this.cupo -= cantidad;
+  }
+
+  devolverCupo(cantidad) {
+    this.cupo += cantidad;
+  }
 }

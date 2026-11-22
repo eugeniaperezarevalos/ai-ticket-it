@@ -9,4 +9,12 @@ export const compraController = {
       next(error);
     }
   },
+  realizarCompra(req, res, next) {
+    try {
+      const compra = compraService.realizarCompra(req.body);
+      res.status(201).json(compra);
+    } catch (error) {
+      next(error);
+    }
+  },
 };
