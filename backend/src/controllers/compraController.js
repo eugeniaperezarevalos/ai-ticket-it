@@ -25,4 +25,20 @@ export const compraController = {
       next(error);
     }
   },
+    mensajesDeCompra(req, res, next) {
+    try {
+      res.json(compraService.mensajesDeCompra(req.params.compraId, req.query.usuarioId));
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  enviarMensaje(req, res, next) {
+    try {
+      const mensajes = compraService.enviarMensaje(req.params.compraId, req.body.usuarioId, req.body.mensaje);
+      res.status(201).json(mensajes);
+    } catch (error) {
+      next(error);
+    }
+  },
 };

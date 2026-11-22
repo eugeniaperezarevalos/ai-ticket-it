@@ -21,6 +21,30 @@ function aDTO(compra) {
   };
 }
 
+function aDTOMensaje(mensaje) {
+  return {
+    autorId: mensaje.usuario.id,
+    autor: `${mensaje.usuario.nombre} ${mensaje.usuario.apellido}`,
+    mensaje: mensaje.mensaje,
+    enviado: mensaje.enviado,
+  };
+}
+
+function buscarCompraParaChat(compraId, usuarioId) {
+  const compra = compraRepository.findById(compraId);
+  if (!compra) {
+    throw new AppError("Compra no encontrada", 404);
+  }
+  const usuario = usuarioRepository.findById(usuarioId);
+  if (!usuario) {
+    throw new AppError("Usuario no encontrado", 404);
+  }
+  if (!compra.esParticipante(usuario)) {
+    throw new AppError("Solo el comprador o el organizador pueden usar este chat", 403);
+  }
+  return { compra, usuario };
+}
+
 export const compraService = {
   comprasDeUsuario(usuarioId) {
     const usuario = usuarioRepository.findById(usuarioId);
@@ -77,5 +101,18 @@ export const compraService = {
 
     compra.cancelar(compra.comprador);
     return aDTO(compra);
+  },
+    mensajesDeCompra(compraId, usuarioId) {
+    const { compra } = buscarCompraParaChat(compraId, usuarioId);
+    return compra.mensajes.map(aDTOMensaje);
+  },
+
+  enviarMensaje(compraId, usuarioId, texto) {
+    if (!texto || texto.trim() === "") {
+      throw new AppError("El mensaje no puede estar vacío", 400);
+    }
+    const { compra, usuario } = buscarCompraParaChat(compraId, usuarioId);
+    compra.agregarMensaje(usuario, texto.trim());
+    return compra.mensajes.map(aDTOMensaje);
   },
 };

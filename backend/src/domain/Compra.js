@@ -26,6 +26,10 @@ export class Compra {
     this.mensajes.push(new Mensaje(usuario, texto));
   }
 
+  esParticipante(usuario) {
+    return usuario.id === this.comprador.id || usuario.id === this.evento.organizador.id;
+  }
+
   puedeCancelarse(hoy = new Date()) {
     const estadosCancelables = [EstadoCompra.PENDIENTE, EstadoCompra.CONFIRMADA];
     return estadosCancelables.includes(this.estado) && this.evento.fecha > hoy;
