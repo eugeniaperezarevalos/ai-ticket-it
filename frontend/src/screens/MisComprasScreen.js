@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { StyleSheet, Text, View, FlatList, ActivityIndicator, Alert, TouchableOpacity } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { API_URL, USUARIO_ID } from "../api";
+import ChatScreen from "./ChatScreen";
 
 const COLORES_ESTADO = {
   PENDIENTE: "#f0ad4e",
@@ -15,6 +16,7 @@ export default function MisComprasScreen() {
   const [compras, setCompras] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
+  const [compraChat, setCompraChat] = useState(null);
 
   function cargarCompras() {
     fetch(`${API_URL}/usuarios/${USUARIO_ID}/compras`)
@@ -53,6 +55,17 @@ export default function MisComprasScreen() {
     ]);
   }
   
+  if (compraChat) {
+    return (
+      <ChatScreen
+        compraId={compraChat.id}
+        usuarioId={USUARIO_ID}
+        titulo={compraChat.evento.nombre}
+        onVolver={() => setCompraChat(null)}
+      />
+    );
+  }
+
   if (cargando) {
     return <ActivityIndicator style={styles.centro} size="large" />;
   }
@@ -76,6 +89,9 @@ export default function MisComprasScreen() {
             {item.diasParaElEvento !== null && (
               <Text style={styles.dias}>Faltan {item.diasParaElEvento} días</Text>
             )}
+            <TouchableOpacity style={styles.botonChat} onPress={() => setCompraChat(item)}>
+              <Text style={styles.botonChatTexto}>Mensajes</Text>
+            </TouchableOpacity>
             {item.puedeCancelarse && (
               <TouchableOpacity style={styles.boton} onPress={() => confirmarCancelacion(item.id)}>
                 <Text style={styles.botonTexto}>Cancelar compra</Text>
@@ -99,4 +115,6 @@ const styles = StyleSheet.create({
   dias: { marginTop: 6, fontStyle: "italic" },
   boton: { marginTop: 12, backgroundColor: "#dc3545", padding: 10, borderRadius: 8, alignItems: "center" },
   botonTexto: { color: "white", fontWeight: "bold" },
+  botonChat: { marginTop: 12, backgroundColor: "#007aff", padding: 10, borderRadius: 8, alignItems: "center" },
+  botonChatTexto: { color: "white", fontWeight: "bold" },
 });
