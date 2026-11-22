@@ -17,4 +17,12 @@ export const compraController = {
       next(error);
     }
   },
+  cancelarCompra(req, res, next) {
+    try {
+      const compra = compraService.cancelarCompra(req.params.compraId, req.body.usuarioId);
+      res.json(compra);
+    } catch (error) {
+      next(error);
+    }
+  },
 };

@@ -34,4 +34,13 @@ export class Compra {
   diasParaElEvento(hoy = new Date()) {
     return Math.ceil((this.evento.fecha - hoy) / MS_POR_DIA);
   }
+
+    cancelar(quien) {
+    const estabaPaga = this.estado === EstadoCompra.CONFIRMADA;
+    this.actualizarEstado(EstadoCompra.CANCELADA, quien);
+    if (estabaPaga) {
+      this.actualizarEstado(EstadoCompra.REEMBOLSADA, quien);
+    }
+    this.tipoEntrada.devolverCupo(this.cantidad);
+  }
 }

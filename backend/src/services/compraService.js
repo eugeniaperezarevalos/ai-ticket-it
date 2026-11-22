@@ -62,4 +62,20 @@ export const compraService = {
     const compra = compraRepository.save(new Compra(comprador, evento, tipoEntrada, cantidad));
     return aDTO(compra);
   },
+
+    cancelarCompra(compraId, usuarioId) {
+    const compra = compraRepository.findById(compraId);
+    if (!compra) {
+      throw new AppError("Compra no encontrada", 404);
+    }
+    if (compra.comprador.id !== String(usuarioId)) {
+      throw new AppError("Solo el comprador puede cancelar la compra", 403);
+    }
+    if (!compra.puedeCancelarse()) {
+      throw new AppError("La compra no se puede cancelar: ya fue utilizada, ya estaba cancelada o el evento ya se realizó", 422);
+    }
+
+    compra.cancelar(compra.comprador);
+    return aDTO(compra);
+  },
 };
