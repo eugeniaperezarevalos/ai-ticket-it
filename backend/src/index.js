@@ -2,6 +2,8 @@ import express from "express";
 import { cargarDatosDeEjemplo } from "./data/seed.js";
 import usuarioRoutes from "./routes/usuarioRoutes.js";
 import compraRoutes from "./routes/compraRoutes.js";
+import eventoRoutes from "./routes/eventoRoutes.js";
+import categoriaRoutes from "./routes/categoriaRoutes.js";
 
 const app = express();
 const PORT = 3000;
@@ -14,6 +16,8 @@ app.get("/health", (req, res) => {
 
 app.use("/usuarios", usuarioRoutes);
 app.use("/compras", compraRoutes);
+app.use("/eventos", eventoRoutes);
+app.use("/categorias", categoriaRoutes);
 
 app.use((err, req, res, next) => {
   const status = err.statusCode ?? 500;
