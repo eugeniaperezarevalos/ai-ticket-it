@@ -90,7 +90,6 @@ export const compraService = {
       throw new AppError(`Solo quedan ${tipoEntrada.cupo} entradas ${tipoEntrada.nombre}`, 422);
     }
 
-    tipoEntrada.descontarCupo(cantidad);
     const compra = compraRepository.save(new Compra(comprador, evento, tipoEntrada, cantidad));
     return aDTO(compra);
   },

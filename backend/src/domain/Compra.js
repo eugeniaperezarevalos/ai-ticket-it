@@ -11,6 +11,7 @@ export class Compra {
     this.evento = evento;
     this.tipoEntrada = tipoEntrada;
     this.cantidad = cantidad;
+    tipoEntrada.descontarCupo(cantidad);
     this.total = tipoEntrada.precio * cantidad;
     this.estado = EstadoCompra.PENDIENTE;
     this.mensajes = [];

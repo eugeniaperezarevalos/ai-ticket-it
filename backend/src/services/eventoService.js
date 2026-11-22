@@ -1,4 +1,4 @@
-import { eventoRepository, categoriaRepository, reseniaRepository } from "../repositories/index.js";
+import { eventoRepository, categoriaRepository, reseniaRepository, usuarioRepository, compraRepository } from "../repositories/index.js";
 import { AppError } from "../errors/AppError.js";
 
 function precioMinimo(evento) {
@@ -97,5 +97,45 @@ export const eventoService = {
 
   categorias() {
     return categoriaRepository.findAll();
+  },
+
+  eventosDeOrganizador(organizadorId) {
+    const organizador = usuarioRepository.findById(organizadorId);
+    if (!organizador) {
+      throw new AppError("Usuario no encontrado", 404);
+    }
+    return eventoRepository
+      .findAll()
+      .filter((evento) => evento.organizador.id === organizador.id)
+      .map(aDTOResumen);
+  },
+
+  comprasDeEvento(eventoId, usuarioId) {
+    const evento = eventoRepository.findById(eventoId);
+    if (!evento) {
+      throw new AppError("Evento no encontrado", 404);
+    }
+    if (evento.organizador.id !== String(usuarioId)) {
+      throw new AppError("Solo el organizador puede ver las compras del evento", 403);
+    }
+
+    return {
+      evento: evento.nombre,
+      disponiblesPorTipo: evento.tiposEntrada.map((tipo) => ({
+        tipo: tipo.nombre,
+        disponibles: tipo.cupo,
+      })),
+      compras: compraRepository
+        .findAll()
+        .filter((compra) => compra.evento.id === evento.id)
+        .map((compra) => ({
+          id: compra.id,
+          comprador: `${compra.comprador.nombre} ${compra.comprador.apellido}`,
+          tipoEntrada: compra.tipoEntrada.nombre,
+          cantidad: compra.cantidad,
+          total: compra.total,
+          estado: compra.estado,
+        })),
+    };
   },
 };

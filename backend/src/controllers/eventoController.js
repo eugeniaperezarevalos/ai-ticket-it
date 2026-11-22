@@ -24,4 +24,20 @@ export const eventoController = {
       next(error);
     }
   },
+
+  eventosDeOrganizador(req, res, next) {
+    try {
+      res.json(eventoService.eventosDeOrganizador(req.params.usuarioId));
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  comprasDeEvento(req, res, next) {
+    try {
+      res.json(eventoService.comprasDeEvento(req.params.eventoId, req.query.usuarioId));
+    } catch (error) {
+      next(error);
+    }
+  },
 };
