@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, View, FlatList, ActivityIndicator } from "react-native";
+import { StyleSheet, Text, View, FlatList, ActivityIndicator, Alert, TouchableOpacity } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { API_URL } from "./src/api";
 
@@ -18,14 +18,43 @@ export default function App() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
+  function cargarCompras() {
     fetch(`${API_URL}/usuarios/${USUARIO_ID}/compras`)
       .then((res) => res.json())
       .then((data) => setCompras(data))
       .catch(() => setError("No se pudo conectar con el servidor"))
       .finally(() => setCargando(false));
+  }
+
+  useEffect(() => {
+    cargarCompras();
   }, []);
 
+    function cancelar(compraId) {
+    fetch(`${API_URL}/compras/${compraId}/cancelar`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ usuarioId: USUARIO_ID }),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) {
+          Alert.alert("No se pudo cancelar", data.error);
+        } else {
+          Alert.alert("Compra cancelada", `Estado: ${data.estado}`);
+          cargarCompras();
+        }
+      })
+      .catch(() => Alert.alert("Error", "No se pudo conectar con el servidor"));
+  }
+
+  function confirmarCancelacion(compraId) {
+    Alert.alert("Cancelar compra", "¿Seguro que querés cancelar esta compra?", [
+      { text: "No" },
+      { text: "Sí, cancelar", style: "destructive", onPress: () => cancelar(compraId) },
+    ]);
+  }
+  
   if (cargando) {
     return <ActivityIndicator style={styles.centro} size="large" />;
   }
@@ -49,6 +78,11 @@ export default function App() {
             {item.diasParaElEvento !== null && (
               <Text style={styles.dias}>Faltan {item.diasParaElEvento} días</Text>
             )}
+            {item.puedeCancelarse && (
+              <TouchableOpacity style={styles.boton} onPress={() => confirmarCancelacion(item.id)}>
+                <Text style={styles.botonTexto}>Cancelar compra</Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
       />
@@ -65,4 +99,6 @@ const styles = StyleSheet.create({
   evento: { fontSize: 18, fontWeight: "bold", marginBottom: 4 },
   estado: { alignSelf: "flex-start", color: "white", fontWeight: "bold", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, marginTop: 8 },
   dias: { marginTop: 6, fontStyle: "italic" },
+  boton: { marginTop: 12, backgroundColor: "#dc3545", padding: 10, borderRadius: 8, alignItems: "center" },
+  botonTexto: { color: "white", fontWeight: "bold" },
 });
