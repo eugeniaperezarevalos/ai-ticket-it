@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { StyleSheet, Text, View, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
 import { API_URL, ORGANIZADOR_ID } from "../api";
 import ComprasEventoScreen from "./ComprasEventoScreen";
+import CrearEventoScreen from "./CrearEventoScreen";
 
 export default function OrganizadorScreen() {
   const [eventos, setEventos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const [eventoSeleccionado, setEventoSeleccionado] = useState(null);
+  const [creando, setCreando] = useState(false);
 
   function cargarEventos() {
     fetch(`${API_URL}/usuarios/${ORGANIZADOR_ID}/eventos`)
@@ -20,6 +22,18 @@ export default function OrganizadorScreen() {
   useEffect(() => {
     cargarEventos();
   }, []);
+
+  if (creando) {
+    return (
+      <CrearEventoScreen
+        onVolver={() => setCreando(false)}
+        onCreado={() => {
+          setCreando(false);
+          cargarEventos();
+        }}
+      />
+    );
+  }
 
   if (eventoSeleccionado) {
     return <ComprasEventoScreen evento={eventoSeleccionado} onVolver={() => setEventoSeleccionado(null)} />;
@@ -35,6 +49,9 @@ export default function OrganizadorScreen() {
     <View style={styles.contenedor}>
       <Text style={styles.titulo}>Mis eventos</Text>
       <Text style={styles.subtitulo}>Panel del organizador</Text>
+      <TouchableOpacity style={styles.botonCrear} onPress={() => setCreando(true)}>
+        <Text style={styles.botonCrearTexto}>+ Crear evento</Text>
+      </TouchableOpacity>
       <FlatList
         data={eventos}
         keyExtractor={(evento) => evento.id}
@@ -66,4 +83,6 @@ const styles = StyleSheet.create({
   evento: { fontSize: 18, fontWeight: "bold", marginBottom: 4 },
   detalle: { color: "#555" },
   verCompras: { color: "#007aff", marginTop: 8, fontWeight: "bold" },
+  botonCrear: { backgroundColor: "#28a745", padding: 12, borderRadius: 8, alignItems: "center", marginBottom: 16 },
+  botonCrearTexto: { color: "white", fontWeight: "bold" },
 });
