@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, FlatList, ActivityIndicator, Alert, TouchableOp
 import { StatusBar } from "expo-status-bar";
 import { API_URL, USUARIO_ID } from "../api";
 import ChatScreen from "./ChatScreen";
+import ReseniaScreen from "./ReseniaScreen";
 
 const COLORES_ESTADO = {
   PENDIENTE: "#f0ad4e",
@@ -17,6 +18,7 @@ export default function MisComprasScreen() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const [compraChat, setCompraChat] = useState(null);
+  const [compraResenia, setCompraResenia] = useState(null);
 
   function cargarCompras() {
     fetch(`${API_URL}/usuarios/${USUARIO_ID}/compras`)
@@ -55,6 +57,19 @@ export default function MisComprasScreen() {
     ]);
   }
   
+  if (compraResenia) {
+    return (
+      <ReseniaScreen
+        compra={compraResenia}
+        onVolver={() => setCompraResenia(null)}
+        onEnviada={() => {
+          setCompraResenia(null);
+          cargarCompras();
+        }}
+      />
+    );
+  }
+
   if (compraChat) {
     return (
       <ChatScreen
@@ -92,6 +107,11 @@ export default function MisComprasScreen() {
             <TouchableOpacity style={styles.botonChat} onPress={() => setCompraChat(item)}>
               <Text style={styles.botonChatTexto}>Mensajes</Text>
             </TouchableOpacity>
+            {item.puedeReseniar && (
+              <TouchableOpacity style={styles.botonResenia} onPress={() => setCompraResenia(item)}>
+                <Text style={styles.botonChatTexto}>Calificar evento</Text>
+              </TouchableOpacity>
+            )}
             {item.puedeCancelarse && (
               <TouchableOpacity style={styles.boton} onPress={() => confirmarCancelacion(item.id)}>
                 <Text style={styles.botonTexto}>Cancelar compra</Text>
@@ -117,4 +137,5 @@ const styles = StyleSheet.create({
   botonTexto: { color: "white", fontWeight: "bold" },
   botonChat: { marginTop: 12, backgroundColor: "#007aff", padding: 10, borderRadius: 8, alignItems: "center" },
   botonChatTexto: { color: "white", fontWeight: "bold" },
+  botonResenia: { marginTop: 12, backgroundColor: "#f0ad4e", padding: 10, borderRadius: 8, alignItems: "center" },
 });
