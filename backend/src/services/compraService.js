@@ -1,7 +1,14 @@
 import { EstadoCompra } from "../domain/EstadoCompra.js";
-import { compraRepository, usuarioRepository, eventoRepository } from "../repositories/index.js";
+import { compraRepository, usuarioRepository, eventoRepository, reseniaRepository } from "../repositories/index.js";
 import { Compra } from "../domain/Compra.js";
 import { AppError } from "../errors/AppError.js";
+import { Resenia } from "../domain/Resenia.js";
+
+function yaFueReseniada(compra) {
+  return reseniaRepository
+    .findAll()
+    .some((resenia) => resenia.comprador.id === compra.comprador.id && resenia.evento.id === compra.evento.id);
+}
 
 function aDTO(compra) {
   return {
@@ -18,6 +25,7 @@ function aDTO(compra) {
     diasParaElEvento:
       compra.estado === EstadoCompra.CONFIRMADA ? compra.diasParaElEvento() : null,
     puedeCancelarse: compra.puedeCancelarse(),
+    puedeReseniar: compra.estado === EstadoCompra.UTILIZADA && !yaFueReseniada(compra),
   };
 }
 
@@ -114,5 +122,37 @@ export const compraService = {
     const { compra, usuario } = buscarCompraParaChat(compraId, usuarioId);
     compra.agregarMensaje(usuario, texto.trim());
     return compra.mensajes.map(aDTOMensaje);
+  },
+  reseniar(compraId, { usuarioId, puntuacion, detalle }) {
+    if (!Number.isInteger(puntuacion) || puntuacion < 1 || puntuacion > 5) {
+      throw new AppError("La puntuación debe ser un número entero entre 1 y 5", 400);
+    }
+    if (!detalle || detalle.trim() === "") {
+      throw new AppError("El comentario no puede estar vacío", 400);
+    }
+
+    const compra = compraRepository.findById(compraId);
+    if (!compra) {
+      throw new AppError("Compra no encontrada", 404);
+    }
+    if (compra.comprador.id !== String(usuarioId)) {
+      throw new AppError("Solo el comprador puede calificar el evento", 403);
+    }
+    if (compra.estado !== EstadoCompra.UTILIZADA) {
+      throw new AppError("Solo se puede calificar un evento después de usar la entrada", 422);
+    }
+    if (yaFueReseniada(compra)) {
+      throw new AppError("Ya calificaste este evento", 422);
+    }
+
+    const resenia = reseniaRepository.save(
+      new Resenia(compra.comprador, compra.evento, detalle.trim(), puntuacion)
+    );
+    return {
+      id: resenia.id,
+      evento: compra.evento.nombre,
+      puntuacion: resenia.puntuacion,
+      detalle: resenia.detalle,
+    };
   },
 };

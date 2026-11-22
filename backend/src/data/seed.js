@@ -52,6 +52,13 @@ export function cargarDatosDeEjemplo() {
     [], martin
   ));
 
+  const jazz = eventoRepository.save(new Evento(
+    "Noche de Jazz", "Cuarteto de jazz en vivo",
+    recitales, diasDesdeHoy(-20),   // ya paso
+    [new TipoEntrada("General", "Sin numerar", 15000, 40)],
+    [], sofia
+  ));
+
   // Compras de Lucia, en distintos estados
   const c1 = compraRepository.save(new Compra(lucia, recital, recital.tiposEntrada[0], 2));
   c1.actualizarEstado(EstadoCompra.CONFIRMADA, lucia);
@@ -61,6 +68,10 @@ export function cargarDatosDeEjemplo() {
   const c3 = compraRepository.save(new Compra(lucia, show, show.tiposEntrada[0], 3));
   c3.actualizarEstado(EstadoCompra.CONFIRMADA, lucia);
   c3.actualizarEstado(EstadoCompra.UTILIZADA, martin);
+
+  const c4 = compraRepository.save(new Compra(lucia, jazz, jazz.tiposEntrada[0], 2));
+  c4.actualizarEstado(EstadoCompra.CONFIRMADA, lucia);
+  c4.actualizarEstado(EstadoCompra.UTILIZADA, sofia);
 
   // Reseña del evento que ya paso
   reseniaRepository.save(new Resenia(lucia, show, "¡Muy divertido, volvería!", 5));

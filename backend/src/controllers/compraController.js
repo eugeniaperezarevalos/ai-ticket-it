@@ -41,4 +41,12 @@ export const compraController = {
       next(error);
     }
   },
+  reseniar(req, res, next) {
+    try {
+      const resenia = compraService.reseniar(req.params.compraId, req.body);
+      res.status(201).json(resenia);
+    } catch (error) {
+      next(error);
+    }
+  },
 };
