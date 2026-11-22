@@ -1,5 +1,7 @@
 import { eventoRepository, categoriaRepository, reseniaRepository, usuarioRepository, compraRepository } from "../repositories/index.js";
 import { AppError } from "../errors/AppError.js";
+import { Evento } from "../domain/Evento.js";
+import { TipoEntrada } from "../domain/TipoEntrada.js";
 
 function precioMinimo(evento) {
   return Math.min(...evento.tiposEntrada.map((tipo) => tipo.precio));
@@ -137,5 +139,62 @@ export const eventoService = {
           estado: compra.estado,
         })),
     };
+  },
+
+  crear({ organizadorId, nombre, descripcion, categoriaId, fecha, tiposEntrada, multimedia }) {
+    if (!nombre || nombre.trim() === "") {
+      throw new AppError("El nombre es obligatorio", 400);
+    }
+
+    const fechaEvento = new Date(fecha);
+    if (!fecha || isNaN(fechaEvento.getTime())) {
+      throw new AppError("La fecha no es válida", 400);
+    }
+    if (fechaEvento <= new Date()) {
+      throw new AppError("La fecha del evento tiene que ser futura", 422);
+    }
+
+    if (!Array.isArray(tiposEntrada) || tiposEntrada.length === 0) {
+      throw new AppError("El evento tiene que tener al menos un tipo de entrada", 400);
+    }
+    for (const tipo of tiposEntrada) {
+      if (!tipo.nombre || tipo.nombre.trim() === "") {
+        throw new AppError("Cada tipo de entrada necesita un nombre", 400);
+      }
+      if (typeof tipo.precio !== "number" || tipo.precio <= 0) {
+        throw new AppError(`El precio de "${tipo.nombre}" tiene que ser mayor a 0`, 400);
+      }
+      if (!Number.isInteger(tipo.cupo) || tipo.cupo <= 0) {
+        throw new AppError(`El cupo de "${tipo.nombre}" tiene que ser un número entero mayor a 0`, 400);
+      }
+    }
+    const nombresTipos = tiposEntrada.map((tipo) => tipo.nombre.trim().toLowerCase());
+    if (new Set(nombresTipos).size !== nombresTipos.length) {
+      throw new AppError("No puede haber dos tipos de entrada con el mismo nombre", 400);
+    }
+
+    const organizador = usuarioRepository.findById(organizadorId);
+    if (!organizador) {
+      throw new AppError("Organizador no encontrado", 404);
+    }
+    const categoria = categoriaRepository.findById(categoriaId);
+    if (!categoria) {
+      throw new AppError("Categoría no encontrada", 404);
+    }
+
+    const evento = eventoRepository.save(
+      new Evento(
+        nombre.trim(),
+        (descripcion ?? "").trim(),
+        categoria,
+        fechaEvento,
+        tiposEntrada.map(
+          (tipo) => new TipoEntrada(tipo.nombre.trim(), (tipo.descripcion ?? "").trim(), tipo.precio, tipo.cupo)
+        ),
+        multimedia ?? [],
+        organizador
+      )
+    );
+    return aDTODetalle(evento);
   },
 };

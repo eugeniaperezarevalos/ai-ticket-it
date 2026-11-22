@@ -40,4 +40,13 @@ export const eventoController = {
       next(error);
     }
   },
+
+  crear(req, res, next) {
+    try {
+      const evento = eventoService.crear(req.body);
+      res.status(201).json(evento);
+    } catch (error) {
+      next(error);
+    }
+  },
 };
