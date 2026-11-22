@@ -2,16 +2,9 @@ import { useEffect, useState } from "react";
 import { StyleSheet, Text, View, FlatList, ActivityIndicator, Alert, TouchableOpacity } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { API_URL, USUARIO_ID } from "../api";
+import { COLORES_ESTADO } from "../estados";
 import ChatScreen from "./ChatScreen";
 import ReseniaScreen from "./ReseniaScreen";
-
-const COLORES_ESTADO = {
-  PENDIENTE: "#f0ad4e",
-  CONFIRMADA: "#28a745",
-  UTILIZADA: "#6c757d",
-  CANCELADA: "#dc3545",
-  REEMBOLSADA: "#17a2b8",
-};
 
 export default function MisComprasScreen() {
   const [compras, setCompras] = useState([]);

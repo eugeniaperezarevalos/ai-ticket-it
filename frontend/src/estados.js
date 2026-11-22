@@ -1,0 +1,7 @@
+export const COLORES_ESTADO = {
+  PENDIENTE: "#f0ad4e",
+  CONFIRMADA: "#28a745",
+  UTILIZADA: "#6c757d",
+  CANCELADA: "#dc3545",
+  REEMBOLSADA: "#17a2b8",
+};

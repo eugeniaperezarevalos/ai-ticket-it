@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import EventosScreen from "./src/screens/EventosScreen";
 import MisComprasScreen from "./src/screens/MisComprasScreen";
+import OrganizadorScreen from "./src/screens/OrganizadorScreen";
 
 export default function App() {
   const [pantalla, setPantalla] = useState("eventos");
@@ -12,6 +13,7 @@ export default function App() {
       <View style={styles.contenido}>
         {pantalla === "eventos" && <EventosScreen />}
         {pantalla === "compras" && <MisComprasScreen />}
+        {pantalla === "organizador" && <OrganizadorScreen />}
       </View>
 
       <View style={styles.menu}>
@@ -20,6 +22,9 @@ export default function App() {
         </TouchableOpacity>
         <TouchableOpacity style={styles.opcion} onPress={() => setPantalla("compras")}>
           <Text style={[styles.opcionTexto, pantalla === "compras" && styles.opcionActiva]}>Mis compras</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.opcion} onPress={() => setPantalla("organizador")}>
+          <Text style={[styles.opcionTexto, pantalla === "organizador" && styles.opcionActiva]}>Organizador</Text>
         </TouchableOpacity>
       </View>
 
