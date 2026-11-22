@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, View, FlatList, TextInput, TouchableOpacity, ActivityIndicator } from "react-native";
 import { API_URL } from "../api";
+import EventoDetalleScreen from "./EventoDetalleScreen";
 
 const ORDENES = [
   { valor: null, etiqueta: "Ninguno" },
@@ -25,6 +26,7 @@ export default function EventosScreen() {
   const [orden, setOrden] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
+  const [eventoSeleccionado, setEventoSeleccionado] = useState(null);
 
   useEffect(() => {
     fetch(`${API_URL}/categorias`)
@@ -48,6 +50,15 @@ export default function EventosScreen() {
       .catch(() => setError("No se pudo conectar con el servidor"))
       .finally(() => setCargando(false));
   }, [texto, categoriaId, orden]);
+
+  if (eventoSeleccionado) {
+    return (
+      <EventoDetalleScreen
+        eventoId={eventoSeleccionado}
+        onVolver={() => setEventoSeleccionado(null)}
+      />
+    );
+  }
 
   return (
     <View style={styles.contenedor}>
@@ -94,7 +105,7 @@ export default function EventosScreen() {
           keyExtractor={(evento) => evento.id}
           ListEmptyComponent={<Text style={styles.vacio}>No se encontraron eventos</Text>}
           renderItem={({ item }) => (
-            <View style={styles.tarjeta}>
+            <TouchableOpacity style={styles.tarjeta} onPress={() => setEventoSeleccionado(item.id)}>
               <Text style={styles.evento}>{item.nombre}</Text>
               <Text style={styles.detalle}>
                 {item.categoria} · {new Date(item.fecha).toLocaleDateString("es-AR")}
@@ -104,7 +115,7 @@ export default function EventosScreen() {
                 Organiza: {item.organizador} ·{" "}
                 {item.puntajeOrganizador !== null ? `★ ${item.puntajeOrganizador.toFixed(1)}` : "Sin reseñas"}
               </Text>
-            </View>
+            </TouchableOpacity>
           )}
         />
       )}
