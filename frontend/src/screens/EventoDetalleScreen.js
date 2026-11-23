@@ -107,7 +107,7 @@ export default function EventoDetalleScreen({ eventoId, onVolver }) {
             <TouchableOpacity
               style={styles.botonCantidad}
               onPress={() => setCantidad(cantidad + 1)}
-              disabled={cantidad >= tipoSeleccionado.disponibles}
+              disabled={cantidad >= tipoSeleccionado.disponibles} // "+"
             >
               <Text style={styles.botonCantidadTexto}>+</Text>
             </TouchableOpacity>
